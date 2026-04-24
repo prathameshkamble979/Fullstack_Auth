@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   handleForgotPassword,
-  validateEmail,
 } from "../controllers/forget-password.controller.web";
 import "../styles/auth.css";
 
