@@ -104,7 +104,7 @@ export function RegisterPage({ onSuccess, onLogin }: RegisterPageProps) {
                 id="name"
                 name="name"
                 type="text"
-                placeholder="John Doe"
+                placeholder="Prathamesh Kamble"
                 value={form.name}
                 onChange={handleChange}
                 className={errors.name ? "has-error" : ""}
