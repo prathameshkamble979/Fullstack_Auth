@@ -48,7 +48,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
         
         res.json({ message: 'OTP sent via Twilio SMS! Check your phone.' });
       } catch (err) {
-        console.error('Twilio Error:', err);
+        console.error('Twilio Full Error:', err);
         // Fallback for prototype
         res.json({ message: `Simulated SMS OTP: ${otpCode}` });
       }
