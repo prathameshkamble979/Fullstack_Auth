@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   handleLogin,
   validateLoginForm,
-} from "../controllers/login.controller.web";
+} from "../controllers/auth.controller.web";
 import "../styles/auth.css";
 
 interface LoginPageProps {

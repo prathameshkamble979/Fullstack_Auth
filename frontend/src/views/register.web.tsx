@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   handleRegister,
   validateRegisterForm,
-} from "../controllers/login.controller.web";
+} from "../controllers/auth.controller.web";
 import "../styles/auth.css";
 
 interface RegisterPageProps {

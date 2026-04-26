@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { handleResetPassword } from "../controllers/forget-password.controller.web";
+import { handleResetPassword } from "../controllers/otp.controller.web";
 import "../styles/auth.css";
 
 interface ResetPasswordPageProps {

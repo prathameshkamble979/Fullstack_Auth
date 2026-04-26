@@ -1,6 +1,6 @@
 import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { getActiveUser, setActiveSession } from "./controllers/storage.controller";
+import { getActiveUser, setActiveSession } from "./controllers/api.client";
 import { LoginPage } from "./views/login.web";
 import { RegisterPage } from "./views/register.web";
 import { ForgotPasswordPage } from "./views/forget-password.web";

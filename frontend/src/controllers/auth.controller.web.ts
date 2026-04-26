@@ -71,8 +71,7 @@ export function validateRegisterForm(
   return errors;
 }
 
-// Import storage helpers
-import { getUsers, saveUsers, setActiveSession } from "./storage.controller";
+import { setActiveSession, fetchApi } from "./api.client";
 
 export async function handleLogin(data: LoginFormData): Promise<AuthResult> {
   const errors = validateLoginForm(data);
@@ -80,30 +79,22 @@ export async function handleLogin(data: LoginFormData): Promise<AuthResult> {
     return { success: false, message: Object.values(errors)[0] };
   }
 
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 800));
+  try {
+    const response = await fetchApi('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
 
-  const users = getUsers();
-  const user = Object.values(users).find(
-    (u) =>
-      u.email.toLowerCase() === data.identifier.toLowerCase() ||
-      u.phone === data.identifier.replace(/\D/g, '').slice(-10) ||
-      u.phone === data.identifier.replace(/[\s-]/g, '') ||
-      u.name.toLowerCase() === data.identifier.toLowerCase()
-  );
+    setActiveSession(response.user, response.token);
 
-  if (!user || user.password !== data.password) {
-    return { success: false, message: "Invalid credentials. Please check your information." };
+    return {
+      success: true,
+      message: "Login successful!",
+      redirectTo: "/dashboard",
+    };
+  } catch (error: any) {
+    return { success: false, message: error.message || "Login failed" };
   }
-
-  // Save the logged in session
-  setActiveSession(user);
-
-  return {
-    success: true,
-    message: "Login successful!",
-    redirectTo: "/dashboard",
-  };
 }
 
 export async function handleRegister(
@@ -114,35 +105,23 @@ export async function handleRegister(
     return { success: false, message: Object.values(errors)[0] };
   }
 
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 800));
+  try {
+    await fetchApi('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        password: data.password
+      }),
+    });
 
-  const users = getUsers();
-
-  // Check if either Email or Phone already exists in the database
-  const emailExists = users[data.email];
-  const phoneExists = Object.values(users).find(u => u.phone === data.phone);
-
-  if (emailExists) {
-    return { success: false, message: "This email address is already registered. Please login." };
+    return {
+      success: true,
+      message: "Account created successfully! You can now log in.",
+      redirectTo: "/dashboard", // or /login depending on preference, but prototype says dashboard
+    };
+  } catch (error: any) {
+    return { success: false, message: error.message || "Registration failed" };
   }
-  
-  if (phoneExists) {
-    return { success: false, message: "This mobile number is already registered. Please login." };
-  }
-
-  // Save to localeStorage database
-  users[data.email] = {
-    name: data.name,
-    email: data.email,
-    phone: data.phone,
-    password: data.password, // Storing password raw for prototype purposes only
-  };
-  saveUsers(users);
-
-  return {
-    success: true,
-    message: "Account created successfully! You can now log in.",
-    redirectTo: "/dashboard",
-  };
 }

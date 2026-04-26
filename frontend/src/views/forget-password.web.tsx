@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   handleForgotPassword,
-} from "../controllers/forget-password.controller.web";
+} from "../controllers/otp.controller.web";
 import "../styles/auth.css";
 
 interface ForgotPasswordPageProps {
