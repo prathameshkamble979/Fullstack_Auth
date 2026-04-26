@@ -59,7 +59,10 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
           process.env.EMAILJS_TEMPLATE_ID!,
           {
             to_email: user.email,
+            from_name: 'Freelance.dev Auth',
             otp: otpCode,
+            code: otpCode,
+            message: `Your verification code is ${otpCode}`,
           },
           {
             publicKey: process.env.EMAILJS_PUBLIC_KEY!,
