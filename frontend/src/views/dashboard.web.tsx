@@ -88,6 +88,7 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
         <aside
           style={{
             flex: "0 0 250px",
+            height: "fit-content",
             background: "var(--surface)",
             padding: "2rem",
             borderRadius: "16px",
@@ -210,7 +211,7 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
           <button
             onClick={onLogout}
             style={{
-              marginTop: "auto",
+              marginTop: "3rem",
               background: "transparent",
               border: "1px solid var(--border)",
               padding: "0.5rem 1rem",
