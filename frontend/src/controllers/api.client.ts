@@ -4,6 +4,7 @@ export interface User {
   name: string;
   email: string;
   phone: string;
+  profilePicture?: string;
 }
 
 export function getActiveUser(): User | null {
@@ -52,4 +53,15 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
   }
 
   return data;
+}
+
+export async function getDashboardDataApi() {
+  return fetchApi('/dashboard');
+}
+
+export async function updateProfilePictureApi(profilePictureBase64: string) {
+  return fetchApi('/user/profile-picture', {
+    method: 'PUT',
+    body: JSON.stringify({ profilePicture: profilePictureBase64 }),
+  });
 }

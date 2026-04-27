@@ -1,17 +1,69 @@
+import { useState, useEffect, useRef } from "react";
+import { getDashboardDataApi, updateProfilePictureApi, setActiveSession } from "../controllers/api.client";
+import type { User } from "../controllers/api.client";
 import "../styles/auth.css";
-
-interface User {
-  name: string;
-  email: string;
-  phone: string;
-}
 
 interface DashboardProps {
   user: User;
   onLogout: () => void;
 }
 
-export function DashboardPage({ user, onLogout }: DashboardProps) {
+export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
+  const [user, setUser] = useState<User>(initialUser);
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getDashboardDataApi();
+        setDashboardData(data);
+        setUser(data.user);
+        setActiveSession(data.user, localStorage.getItem('auth_token') || undefined);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleProfilePictureClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result as string;
+        try {
+          const res = await updateProfilePictureApi(base64String);
+          setUser(res.user);
+          setActiveSession(res.user, localStorage.getItem('auth_token') || undefined);
+        } catch (error) {
+          console.error("Failed to update profile picture:", error);
+          alert("Failed to update profile picture");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{ width: "100%", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <p style={{ color: "var(--text-sec)" }}>Loading dashboard...</p>
+      </div>
+    );
+  }
+
+  const { stats, currentProject, recentInvoices } = dashboardData || {};
+
   return (
     <div
       style={{ 
@@ -39,12 +91,45 @@ export function DashboardPage({ user, onLogout }: DashboardProps) {
             padding: "2rem",
             borderRadius: "16px",
             border: "1px solid var(--border)",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           <div className="form-logo" style={{ marginBottom: "2rem" }}>
             Freelance.dev
           </div>
-          <div style={{ marginBottom: "2rem" }}>
+          <div style={{ marginBottom: "2rem", display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+            <div 
+              style={{
+                width: "64px",
+                height: "64px",
+                borderRadius: "50%",
+                background: "var(--bg-color)",
+                marginBottom: "1rem",
+                cursor: "pointer",
+                overflow: "hidden",
+                border: "2px solid var(--primary-color)",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                position: "relative"
+              }}
+              onClick={handleProfilePictureClick}
+              title="Click to change profile picture"
+            >
+              {user.profilePicture ? (
+                <img src={user.profilePicture} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <span style={{ color: "var(--text-sec)", fontSize: "24px" }}>{user.name.charAt(0)}</span>
+              )}
+              <input 
+                type="file" 
+                accept="image/*" 
+                ref={fileInputRef} 
+                style={{ display: "none" }} 
+                onChange={handleFileChange}
+              />
+            </div>
             <p
               style={{
                 margin: 0,
@@ -130,8 +215,6 @@ export function DashboardPage({ user, onLogout }: DashboardProps) {
               borderRadius: "8px",
               cursor: "pointer",
               color: "var(--text-sec)",
-              position: "absolute",
-              bottom: "2rem",
               transition: "color 0.2s"
             }}
             onMouseOver={(e) => e.currentTarget.style.color = "var(--error)"}
@@ -190,7 +273,7 @@ export function DashboardPage({ user, onLogout }: DashboardProps) {
               >
                 Active Projects
               </p>
-              <h2 style={{ margin: "0.5rem 0 0", fontSize: "1.75rem" }}>1</h2>
+              <h2 style={{ margin: "0.5rem 0 0", fontSize: "1.75rem" }}>{stats?.activeProjectsCount || 0}</h2>
             </div>
             <div
               style={{
@@ -210,7 +293,7 @@ export function DashboardPage({ user, onLogout }: DashboardProps) {
                 Pending Invoices
               </p>
               <h2 style={{ margin: "0.5rem 0 0", fontSize: "1.75rem" }}>
-                ₹0.00
+                ₹{stats?.pendingInvoicesTotal?.toLocaleString('en-IN') || "0.00"}
               </h2>
             </div>
             <div
@@ -230,7 +313,7 @@ export function DashboardPage({ user, onLogout }: DashboardProps) {
               >
                 Unread Messages
               </p>
-              <h2 style={{ margin: "0.5rem 0 0", fontSize: "1.75rem" }}>2</h2>
+              <h2 style={{ margin: "0.5rem 0 0", fontSize: "1.75rem" }}>{stats?.unreadMessagesCount || 0}</h2>
             </div>
           </div>
 
@@ -244,109 +327,99 @@ export function DashboardPage({ user, onLogout }: DashboardProps) {
             }}
           >
             <h3 style={{ margin: "0 0 1.5rem" }}>Current Project</h3>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "1rem",
-              }}
-            >
-              <div>
-                <h4 style={{ margin: 0, fontSize: "1.1rem" }}>
-                  E-Commerce Store Redesign
-                </h4>
-                <p
-                  style={{
-                    margin: "0.25rem 0 0",
-                    color: "var(--text-sec)",
-                    fontSize: "0.875rem",
-                  }}
-                >
-                  Due: Nov 15th, 2026
-                </p>
-              </div>
-              <span
-                style={{
-                  background: "var(--bg-color)",
-                  padding: "0.25rem 0.75rem",
-                  borderRadius: "99px",
-                  fontSize: "0.875rem",
-                  fontWeight: "500",
-                }}
-              >
-                75% Complete
-              </span>
-            </div>
-
-            {/* Progress Bar */}
-            <div
-              style={{
-                width: "100%",
-                height: "8px",
-                background: "var(--bg-color)",
-                borderRadius: "4px",
-                overflow: "hidden",
-                marginBottom: "1.5rem",
-              }}
-            >
-              <div
-                style={{
-                  width: "75%",
-                  height: "100%",
-                  background: "var(--primary-color)",
-                  borderRadius: "4px",
-                }}
-              ></div>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.75rem",
-              }}
-            >
-              <div
-                style={{ display: "flex", gap: "1rem", alignItems: "center" }}
-              >
+            {currentProject ? (
+              <>
                 <div
                   style={{
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    background: "var(--primary-color)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "1rem",
                   }}
-                ></div>
-                <p style={{ margin: 0, fontSize: "0.9rem" }}>
-                  Frontend Development{" "}
-                  <span style={{ color: "var(--text-sec)" }}>
-                    (In Progress)
+                >
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: "1.1rem" }}>
+                      {currentProject.title}
+                    </h4>
+                    <p
+                      style={{
+                        margin: "0.25rem 0 0",
+                        color: "var(--text-sec)",
+                        fontSize: "0.875rem",
+                      }}
+                    >
+                      Due: {new Date(currentProject.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  </div>
+                  <span
+                    style={{
+                      background: "var(--bg-color)",
+                      padding: "0.25rem 0.75rem",
+                      borderRadius: "99px",
+                      fontSize: "0.875rem",
+                      fontWeight: "500",
+                    }}
+                  >
+                    {currentProject.progress}% Complete
                   </span>
-                </p>
-              </div>
-              <div
-                style={{ display: "flex", gap: "1rem", alignItems: "center" }}
-              >
+                </div>
+
+                {/* Progress Bar */}
                 <div
                   style={{
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    background: "var(--success-color, #10b981)",
-                  }}
-                ></div>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "0.9rem",
-                    color: "var(--text-sec)",
+                    width: "100%",
+                    height: "8px",
+                    background: "var(--bg-color)",
+                    borderRadius: "4px",
+                    overflow: "hidden",
+                    marginBottom: "1.5rem",
                   }}
                 >
-                  Wireframes Approved
-                </p>
-              </div>
-            </div>
+                  <div
+                    style={{
+                      width: `${currentProject.progress}%`,
+                      height: "100%",
+                      background: "var(--primary-color)",
+                      borderRadius: "4px",
+                    }}
+                  ></div>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.75rem",
+                  }}
+                >
+                  {currentProject.tasks?.map((task: any, index: number) => (
+                    <div
+                      key={index}
+                      style={{ display: "flex", gap: "1rem", alignItems: "center" }}
+                    >
+                      <div
+                        style={{
+                          width: "12px",
+                          height: "12px",
+                          borderRadius: "50%",
+                          background: task.completed ? "var(--success-color, #10b981)" : "var(--primary-color)",
+                        }}
+                      ></div>
+                      <p style={{ margin: 0, fontSize: "0.9rem", color: task.completed ? "var(--text-sec)" : "var(--text-pri)" }}>
+                        {task.title}{" "}
+                        {!task.completed && (
+                          <span style={{ color: "var(--text-sec)" }}>
+                            (In Progress)
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+               <p style={{ color: "var(--text-sec)" }}>No active project currently.</p>
+            )}
           </section>
 
           {/* Recent Invoices */}
@@ -359,93 +432,71 @@ export function DashboardPage({ user, onLogout }: DashboardProps) {
             }}
           >
             <h3 style={{ margin: "0 0 1.5rem" }}>Recent Invoices</h3>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                textAlign: "left",
-              }}
-            >
-              <thead>
-                <tr
-                  style={{
-                    borderBottom: "1px solid var(--border)",
-                    color: "var(--text-sec)",
-                  }}
-                >
-                  <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
-                    Invoice Number
-                  </th>
-                  <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
-                    Date
-                  </th>
-                  <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
-                    Amount
-                  </th>
-                  <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td style={{ padding: "1rem 0" }}>INV-1043</td>
-                  <td
+            {recentInvoices && recentInvoices.length > 0 ? (
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  textAlign: "left",
+                }}
+              >
+                <thead>
+                  <tr
                     style={{
-                      padding: "1rem 0",
+                      borderBottom: "1px solid var(--border)",
                       color: "var(--text-sec)",
                     }}
                   >
-                    Oct 20, 2026
-                  </td>
-                  <td style={{ padding: "1rem 0", fontWeight: "500" }}>
-                    ₹20,500
-                  </td>
-                  <td style={{ padding: "1rem 0" }}>
-                    <span
-                      style={{
-                        background: "#fef3c7",
-                        color: "#92400e",
-                        padding: "0.25rem 0.5rem",
-                        borderRadius: "4px",
-                        fontSize: "0.75rem",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      PENDING
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ padding: "1rem 0" }}>INV-1042</td>
-                  <td
-                    style={{
-                      padding: "1rem 0",
-                      color: "var(--text-sec)",
-                    }}
-                  >
-                    Oct 01, 2026
-                  </td>
-                  <td style={{ padding: "1rem 0", fontWeight: "500" }}>
-                    ₹41,000
-                  </td>
-                  <td style={{ padding: "1rem 0" }}>
-                    <span
-                      style={{
-                        background: "#d1fae5",
-                        color: "#065f46",
-                        padding: "0.25rem 0.5rem",
-                        borderRadius: "4px",
-                        fontSize: "0.75rem",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      PAID
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                    <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
+                      Invoice Number
+                    </th>
+                    <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
+                      Date
+                    </th>
+                    <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
+                      Amount
+                    </th>
+                    <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentInvoices.map((invoice: any, index: number) => (
+                    <tr key={index} style={{ borderBottom: "1px solid var(--border)" }}>
+                      <td style={{ padding: "1rem 0" }}>{invoice.invoiceNumber}</td>
+                      <td
+                        style={{
+                          padding: "1rem 0",
+                          color: "var(--text-sec)",
+                        }}
+                      >
+                        {new Date(invoice.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
+                      </td>
+                      <td style={{ padding: "1rem 0", fontWeight: "500" }}>
+                        ₹{invoice.amount.toLocaleString('en-IN')}
+                      </td>
+                      <td style={{ padding: "1rem 0" }}>
+                        <span
+                          style={{
+                            background: invoice.status === 'PAID' ? "#d1fae5" : "#fef3c7",
+                            color: invoice.status === 'PAID' ? "#065f46" : "#92400e",
+                            padding: "0.25rem 0.5rem",
+                            borderRadius: "4px",
+                            fontSize: "0.75rem",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {invoice.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+               <p style={{ color: "var(--text-sec)" }}>No recent invoices.</p>
+            )}
           </section>
         </main>
       </div>

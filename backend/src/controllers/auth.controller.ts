@@ -69,9 +69,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       message: 'Login successful',
       token,
       user: {
+        id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone
+        phone: user.phone,
+        profilePicture: user.profilePicture
       }
     });
   } catch (error) {
