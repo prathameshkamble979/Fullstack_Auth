@@ -49,10 +49,9 @@ const corsOptions: CorsOptions = {
 };
 
 /**
- * Apply CORS globally (INCLUDING preflight)
+ * Apply CORS globally
  */
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
 /**
  * Middlewares
