@@ -32,7 +32,10 @@ export const getDashboardData = async (req: AuthRequest, res: Response): Promise
         unreadMessagesCount
       },
       currentProject,
-      recentInvoices: invoices.slice(0, 5) // top 5 recent invoices
+      recentInvoices: invoices.slice(0, 5), // top 5 recent invoices
+      allProjects: projects,
+      allInvoices: invoices,
+      messages
     });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching dashboard data' });

@@ -63,7 +63,7 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
     );
   }
 
-  const { stats, currentProject, recentInvoices } = dashboardData || {};
+  const { stats, currentProject, recentInvoices, allProjects, allInvoices, messages } = dashboardData || {};
 
   return (
     <div
@@ -155,15 +155,8 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
           </div>
 
           <nav
-            style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+            style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "1rem" }}
           >
-            <button
-              className="btn-primary"
-              style={{ padding: "0.75rem", marginBottom: "1rem" }}
-              onClick={() => alert("New Project creation coming soon!")}
-            >
-              + New Project
-            </button>
             <a
               href="#"
               onClick={(e) => { e.preventDefault(); setActiveTab("dashboard"); }}
@@ -250,7 +243,7 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
                 color: "var(--text-pri)",
               }}
             >
-              Client Portal
+              Freelancer Dashboard
             </h1>
             <p style={{ margin: "0.5rem 0 0", color: "var(--text-sec)" }}>
               Here's what's happening with your projects.
@@ -516,21 +509,102 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
           {activeTab === "projects" && (
             <section style={{ background: "var(--surface)", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border)" }}>
               <h3 style={{ margin: "0 0 1.5rem" }}>All Projects</h3>
-              <p style={{ color: "var(--text-sec)" }}>Full project list feature is coming soon!</p>
+              {allProjects && allProjects.length > 0 ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  {allProjects.map((project: any, idx: number) => (
+                    <div key={idx} style={{ padding: "1.5rem", background: "var(--bg-color)", borderRadius: "8px", border: "1px solid var(--border)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                        <h4 style={{ margin: 0, fontSize: "1.1rem" }}>{project.title}</h4>
+                        <span style={{ 
+                          padding: "0.25rem 0.75rem", 
+                          borderRadius: "99px", 
+                          fontSize: "0.75rem", 
+                          fontWeight: "bold",
+                          background: project.status === 'Completed' ? "var(--success-color, #10b981)" : "var(--primary-color)",
+                          color: project.status === 'Completed' ? "#fff" : "#000"
+                        }}>
+                          {project.status}
+                        </span>
+                      </div>
+                      <p style={{ margin: "0 0 1rem", color: "var(--text-sec)", fontSize: "0.875rem" }}>
+                        Due: {new Date(project.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | Progress: {project.progress}%
+                      </p>
+                      <div style={{ width: "100%", height: "6px", background: "var(--surface)", borderRadius: "3px", overflow: "hidden" }}>
+                        <div style={{ width: `${project.progress}%`, height: "100%", background: project.status === 'Completed' ? "var(--success-color, #10b981)" : "var(--primary-color)", borderRadius: "3px" }}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ color: "var(--text-sec)" }}>No projects found.</p>
+              )}
             </section>
           )}
 
           {activeTab === "invoices" && (
             <section style={{ background: "var(--surface)", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border)" }}>
               <h3 style={{ margin: "0 0 1.5rem" }}>All Invoices</h3>
-              <p style={{ color: "var(--text-sec)" }}>Invoice management feature is coming soon!</p>
+              {allInvoices && allInvoices.length > 0 ? (
+                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid var(--border)", color: "var(--text-sec)" }}>
+                      <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>Invoice Number</th>
+                      <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>Date</th>
+                      <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>Amount</th>
+                      <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allInvoices.map((invoice: any, index: number) => (
+                      <tr key={index} style={{ borderBottom: "1px solid var(--border)" }}>
+                        <td style={{ padding: "1rem 0" }}>{invoice.invoiceNumber}</td>
+                        <td style={{ padding: "1rem 0", color: "var(--text-sec)" }}>
+                          {new Date(invoice.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
+                        </td>
+                        <td style={{ padding: "1rem 0", fontWeight: "500" }}>₹{invoice.amount.toLocaleString('en-IN')}</td>
+                        <td style={{ padding: "1rem 0" }}>
+                          <span style={{
+                            background: invoice.status === 'PAID' ? "#d1fae5" : "#fef3c7",
+                            color: invoice.status === 'PAID' ? "#065f46" : "#92400e",
+                            padding: "0.25rem 0.5rem", borderRadius: "4px", fontSize: "0.75rem", fontWeight: "bold"
+                          }}>
+                            {invoice.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p style={{ color: "var(--text-sec)" }}>No invoices found.</p>
+              )}
             </section>
           )}
 
           {activeTab === "messages" && (
             <section style={{ background: "var(--surface)", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border)" }}>
               <h3 style={{ margin: "0 0 1.5rem" }}>Messages</h3>
-              <p style={{ color: "var(--text-sec)" }}>Messaging interface is coming soon!</p>
+              {messages && messages.length > 0 ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  {messages.map((msg: any, idx: number) => (
+                    <div key={idx} style={{ 
+                      padding: "1.5rem", 
+                      background: msg.read ? "var(--bg-color)" : "var(--surface)", 
+                      borderRadius: "8px", 
+                      border: msg.read ? "1px solid var(--border)" : "1px solid var(--primary-color)",
+                      borderLeft: msg.read ? undefined : "4px solid var(--primary-color)"
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                        <h4 style={{ margin: 0, fontSize: "1rem", color: msg.read ? "var(--text-sec)" : "var(--text-pri)" }}>{msg.senderName}</h4>
+                        {!msg.read && <span style={{ fontSize: "0.75rem", color: "var(--primary-color)", fontWeight: "bold" }}>New</span>}
+                      </div>
+                      <p style={{ margin: 0, color: "var(--text-pri)", fontSize: "0.95rem" }}>{msg.content}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ color: "var(--text-sec)" }}>No messages found.</p>
+              )}
             </section>
           )}
         </main>
