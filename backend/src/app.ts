@@ -1,6 +1,7 @@
 import express from 'express';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import dotenv from 'dotenv';
+
 import authRoutes from './routes/auth.routes';
 import otpRoutes from './routes/otp.routes';
 import dashboardRoutes from './routes/dashboard.routes';
@@ -10,25 +11,57 @@ dotenv.config();
 
 const app = express();
 
+/**
+ * Normalize origin (remove trailing slash)
+ */
+const normalizeOrigin = (url: string) => url.replace(/\/$/, '');
+
+/**
+ * Allowed origins
+ */
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
-  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL.replace(/\/$/, '')] : [])
+  ...(process.env.FRONTEND_URL
+    ? [normalizeOrigin(process.env.FRONTEND_URL)]
+    : [])
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+console.log('✅ Allowed Origins:', allowedOrigins);
+
+/**
+ * Single source of truth for CORS
+ */
+const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow non-browser clients
+
+    const normalizedOrigin = normalizeOrigin(origin);
+
+    if (allowedOrigins.includes(normalizedOrigin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.error('❌ CORS Blocked:', normalizedOrigin);
+      callback(new Error(`Not allowed by CORS: ${normalizedOrigin}`));
     }
   },
   credentials: true
-}));
-app.options("*", cors());
+};
+
+/**
+ * Apply CORS globally (INCLUDING preflight)
+ */
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
+/**
+ * Middlewares
+ */
 app.use(express.json({ limit: '5mb' }));
 
+/**
+ * Routes
+ */
 app.use('/api/auth', authRoutes);
 app.use('/api/otp', otpRoutes);
 app.use('/api/dashboard', dashboardRoutes);
