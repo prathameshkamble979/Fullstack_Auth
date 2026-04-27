@@ -109,7 +109,7 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
                 marginBottom: "1rem",
                 cursor: "pointer",
                 overflow: "hidden",
-                border: "2px solid var(--primary-color)",
+                border: "2px solid var(--accent)",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
@@ -384,7 +384,7 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
                         style={{
                           width: `${currentProject.progress}%`,
                           height: "100%",
-                          background: "var(--primary-color)",
+                          background: "var(--accent)",
                           borderRadius: "4px",
                         }}
                       ></div>
@@ -407,7 +407,7 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
                               width: "12px",
                               height: "12px",
                               borderRadius: "50%",
-                              background: task.completed ? "var(--success-color, #10b981)" : "var(--primary-color)",
+                              background: task.completed ? "var(--success-color, #10b981)" : "var(--accent)",
                             }}
                           ></div>
                           <p style={{ margin: 0, fontSize: "0.9rem", color: task.completed ? "var(--text-sec)" : "var(--text-pri)" }}>
@@ -520,7 +520,7 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
                           borderRadius: "99px", 
                           fontSize: "0.75rem", 
                           fontWeight: "bold",
-                          background: project.status === 'Completed' ? "var(--success-color, #10b981)" : "var(--primary-color)",
+                          background: project.status === 'Completed' ? "var(--success-color, #10b981)" : "var(--accent)",
                           color: project.status === 'Completed' ? "#fff" : "#000"
                         }}>
                           {project.status}
@@ -530,7 +530,7 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
                         Due: {new Date(project.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | Progress: {project.progress}%
                       </p>
                       <div style={{ width: "100%", height: "6px", background: "rgba(255,255,255,0.12)", borderRadius: "3px", overflow: "hidden" }}>
-                        <div style={{ width: `${project.progress}%`, height: "100%", background: project.status === 'Completed' ? "#10b981" : "var(--primary-color)", borderRadius: "3px" }}></div>
+                        <div style={{ width: `${project.progress}%`, height: "100%", background: project.status === 'Completed' ? "#10b981" : "var(--accent)", borderRadius: "3px" }}></div>
                       </div>
                     </div>
                   ))}
@@ -591,12 +591,12 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
                       padding: "1.5rem", 
                       background: msg.read ? "var(--bg-color)" : "var(--surface)", 
                       borderRadius: "8px", 
-                      border: msg.read ? "1px solid var(--border)" : "1px solid var(--primary-color)",
-                      borderLeft: msg.read ? undefined : "4px solid var(--primary-color)"
+                      border: msg.read ? "1px solid var(--border)" : "1px solid var(--accent)",
+                      borderLeft: msg.read ? undefined : "4px solid var(--accent)"
                     }}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
                         <h4 style={{ margin: 0, fontSize: "1rem", color: msg.read ? "var(--text-sec)" : "var(--text-pri)" }}>{msg.senderName}</h4>
-                        {!msg.read && <span style={{ fontSize: "0.75rem", color: "var(--primary-color)", fontWeight: "bold" }}>New</span>}
+                        {!msg.read && <span style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: "bold" }}>New</span>}
                       </div>
                       <p style={{ margin: 0, color: "var(--text-pri)", fontSize: "0.95rem" }}>{msg.content}</p>
                     </div>
