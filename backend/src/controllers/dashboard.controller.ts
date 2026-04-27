@@ -12,7 +12,7 @@ export const getDashboardData = async (req: AuthRequest, res: Response): Promise
     const [projects, invoices, messages, user] = await Promise.all([
       Project.find({ userId }).sort({ createdAt: -1 }),
       Invoice.find({ userId }).sort({ date: -1 }),
-      Message.find({ userId }),
+      Message.find({ userId }).sort({ createdAt: -1 }),
       User.findById(userId).select('-passwordHash')
     ]);
 

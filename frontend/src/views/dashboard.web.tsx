@@ -520,8 +520,8 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
                           borderRadius: "99px", 
                           fontSize: "0.75rem", 
                           fontWeight: "bold",
-                          background: project.status === 'Completed' ? "var(--success-color, #10b981)" : "var(--accent)",
-                          color: project.status === 'Completed' ? "#fff" : "#000"
+                          background: project.status === 'Completed' ? "rgba(16, 185, 129, 0.15)" : "rgba(212, 169, 106, 0.15)",
+                          color: project.status === 'Completed' ? "#10b981" : "#d4a96a"
                         }}>
                           {project.status}
                         </span>
@@ -530,7 +530,7 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
                         Due: {new Date(project.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | Progress: {project.progress}%
                       </p>
                       <div style={{ width: "100%", height: "6px", background: "rgba(255,255,255,0.12)", borderRadius: "3px", overflow: "hidden" }}>
-                        <div style={{ width: `${project.progress}%`, height: "100%", background: project.status === 'Completed' ? "#10b981" : "var(--accent)", borderRadius: "3px" }}></div>
+                        <div style={{ width: `${project.progress}%`, height: "100%", background: project.status === 'Completed' ? "#10b981" : "#d4a96a", borderRadius: "3px" }}></div>
                       </div>
                     </div>
                   ))}
