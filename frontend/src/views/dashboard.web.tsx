@@ -529,8 +529,8 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
                       <p style={{ margin: "0 0 1rem", color: "var(--text-sec)", fontSize: "0.875rem" }}>
                         Due: {new Date(project.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} | Progress: {project.progress}%
                       </p>
-                      <div style={{ width: "100%", height: "6px", background: "var(--surface)", borderRadius: "3px", overflow: "hidden" }}>
-                        <div style={{ width: `${project.progress}%`, height: "100%", background: project.status === 'Completed' ? "var(--success-color, #10b981)" : "var(--primary-color)", borderRadius: "3px" }}></div>
+                      <div style={{ width: "100%", height: "6px", background: "rgba(255,255,255,0.12)", borderRadius: "3px", overflow: "hidden" }}>
+                        <div style={{ width: `${project.progress}%`, height: "100%", background: project.status === 'Completed' ? "#10b981" : "var(--primary-color)", borderRadius: "3px" }}></div>
                       </div>
                     </div>
                   ))}
