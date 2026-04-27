@@ -12,6 +12,7 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
   const [user, setUser] = useState<User>(initialUser);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("dashboard");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -159,15 +160,17 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
             <button
               className="btn-primary"
               style={{ padding: "0.75rem", marginBottom: "1rem" }}
+              onClick={() => alert("New Project creation coming soon!")}
             >
               + New Project
             </button>
             <a
               href="#"
+              onClick={(e) => { e.preventDefault(); setActiveTab("dashboard"); }}
               style={{
                 padding: "0.5rem",
-                color: "var(--accent)",
-                fontWeight: "500",
+                color: activeTab === "dashboard" ? "var(--accent)" : "var(--text-sec)",
+                fontWeight: activeTab === "dashboard" ? "500" : "normal",
                 textDecoration: "none",
               }}
             >
@@ -175,9 +178,11 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
             </a>
             <a
               href="#"
+              onClick={(e) => { e.preventDefault(); setActiveTab("projects"); }}
               style={{
                 padding: "0.5rem",
-                color: "var(--text-sec)",
+                color: activeTab === "projects" ? "var(--accent)" : "var(--text-sec)",
+                fontWeight: activeTab === "projects" ? "500" : "normal",
                 textDecoration: "none",
               }}
             >
@@ -185,9 +190,11 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
             </a>
             <a
               href="#"
+              onClick={(e) => { e.preventDefault(); setActiveTab("invoices"); }}
               style={{
                 padding: "0.5rem",
-                color: "var(--text-sec)",
+                color: activeTab === "invoices" ? "var(--accent)" : "var(--text-sec)",
+                fontWeight: activeTab === "invoices" ? "500" : "normal",
                 textDecoration: "none",
               }}
             >
@@ -195,9 +202,11 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
             </a>
             <a
               href="#"
+              onClick={(e) => { e.preventDefault(); setActiveTab("messages"); }}
               style={{
                 padding: "0.5rem",
-                color: "var(--text-sec)",
+                color: activeTab === "messages" ? "var(--accent)" : "var(--text-sec)",
+                fontWeight: activeTab === "messages" ? "500" : "normal",
                 textDecoration: "none",
               }}
             >
@@ -248,256 +257,282 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
             </p>
           </header>
 
-          {/* Stats Row */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "1rem",
-            }}
-          >
-            <div
-              style={{
-                background: "var(--surface)",
-                padding: "1.5rem",
-                borderRadius: "12px",
-                border: "1px solid var(--border)",
-              }}
-            >
-              <p
+          {/* Dynamic Content Based on Tab */}
+          {activeTab === "dashboard" && (
+            <>
+              {/* Stats Row */}
+              <div
                 style={{
-                  margin: 0,
-                  color: "var(--text-sec)",
-                  fontSize: "0.875rem",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: "1rem",
                 }}
               >
-                Active Projects
-              </p>
-              <h2 style={{ margin: "0.5rem 0 0", fontSize: "1.75rem" }}>{stats?.activeProjectsCount || 0}</h2>
-            </div>
-            <div
-              style={{
-                background: "var(--surface)",
-                padding: "1.5rem",
-                borderRadius: "12px",
-                border: "1px solid var(--border)",
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  color: "var(--text-sec)",
-                  fontSize: "0.875rem",
-                }}
-              >
-                Pending Invoices
-              </p>
-              <h2 style={{ margin: "0.5rem 0 0", fontSize: "1.75rem" }}>
-                ₹{stats?.pendingInvoicesTotal?.toLocaleString('en-IN') || "0.00"}
-              </h2>
-            </div>
-            <div
-              style={{
-                background: "var(--surface)",
-                padding: "1.5rem",
-                borderRadius: "12px",
-                border: "1px solid var(--border)",
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  color: "var(--text-sec)",
-                  fontSize: "0.875rem",
-                }}
-              >
-                Unread Messages
-              </p>
-              <h2 style={{ margin: "0.5rem 0 0", fontSize: "1.75rem" }}>{stats?.unreadMessagesCount || 0}</h2>
-            </div>
-          </div>
-
-          {/* Active Project Tracker */}
-          <section
-            style={{
-              background: "var(--surface)",
-              padding: "2rem",
-              borderRadius: "12px",
-              border: "1px solid var(--border)",
-            }}
-          >
-            <h3 style={{ margin: "0 0 1.5rem" }}>Current Project</h3>
-            {currentProject ? (
-              <>
                 <div
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "1rem",
+                    background: "var(--surface)",
+                    padding: "1.5rem",
+                    borderRadius: "12px",
+                    border: "1px solid var(--border)",
                   }}
                 >
-                  <div>
-                    <h4 style={{ margin: 0, fontSize: "1.1rem" }}>
-                      {currentProject.title}
-                    </h4>
-                    <p
-                      style={{
-                        margin: "0.25rem 0 0",
-                        color: "var(--text-sec)",
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      Due: {new Date(currentProject.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </p>
-                  </div>
-                  <span
+                  <p
                     style={{
-                      background: "var(--bg-color)",
-                      padding: "0.25rem 0.75rem",
-                      borderRadius: "99px",
+                      margin: 0,
+                      color: "var(--text-sec)",
                       fontSize: "0.875rem",
-                      fontWeight: "500",
                     }}
                   >
-                    {currentProject.progress}% Complete
-                  </span>
+                    Active Projects
+                  </p>
+                  <h2 style={{ margin: "0.5rem 0 0", fontSize: "1.75rem" }}>{stats?.activeProjectsCount || 0}</h2>
                 </div>
-
-                {/* Progress Bar */}
                 <div
                   style={{
-                    width: "100%",
-                    height: "8px",
-                    background: "var(--bg-color)",
-                    borderRadius: "4px",
-                    overflow: "hidden",
-                    marginBottom: "1.5rem",
+                    background: "var(--surface)",
+                    padding: "1.5rem",
+                    borderRadius: "12px",
+                    border: "1px solid var(--border)",
                   }}
                 >
-                  <div
+                  <p
                     style={{
-                      width: `${currentProject.progress}%`,
-                      height: "100%",
-                      background: "var(--primary-color)",
-                      borderRadius: "4px",
+                      margin: 0,
+                      color: "var(--text-sec)",
+                      fontSize: "0.875rem",
                     }}
-                  ></div>
+                  >
+                    Pending Invoices
+                  </p>
+                  <h2 style={{ margin: "0.5rem 0 0", fontSize: "1.75rem" }}>
+                    ₹{stats?.pendingInvoicesTotal?.toLocaleString('en-IN') || "0.00"}
+                  </h2>
                 </div>
-
                 <div
                   style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.75rem",
+                    background: "var(--surface)",
+                    padding: "1.5rem",
+                    borderRadius: "12px",
+                    border: "1px solid var(--border)",
                   }}
                 >
-                  {currentProject.tasks?.map((task: any, index: number) => (
+                  <p
+                    style={{
+                      margin: 0,
+                      color: "var(--text-sec)",
+                      fontSize: "0.875rem",
+                    }}
+                  >
+                    Unread Messages
+                  </p>
+                  <h2 style={{ margin: "0.5rem 0 0", fontSize: "1.75rem" }}>{stats?.unreadMessagesCount || 0}</h2>
+                </div>
+              </div>
+
+              {/* Active Project Tracker */}
+              <section
+                style={{
+                  background: "var(--surface)",
+                  padding: "2rem",
+                  borderRadius: "12px",
+                  border: "1px solid var(--border)",
+                }}
+              >
+                <h3 style={{ margin: "0 0 1.5rem" }}>Current Project</h3>
+                {currentProject ? (
+                  <>
                     <div
-                      key={index}
-                      style={{ display: "flex", gap: "1rem", alignItems: "center" }}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "1rem",
+                      }}
+                    >
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: "1.1rem" }}>
+                          {currentProject.title}
+                        </h4>
+                        <p
+                          style={{
+                            margin: "0.25rem 0 0",
+                            color: "var(--text-sec)",
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          Due: {new Date(currentProject.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </p>
+                      </div>
+                      <span
+                        style={{
+                          background: "var(--bg-color)",
+                          padding: "0.25rem 0.75rem",
+                          borderRadius: "99px",
+                          fontSize: "0.875rem",
+                          fontWeight: "500",
+                        }}
+                      >
+                        {currentProject.progress}% Complete
+                      </span>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "8px",
+                        background: "var(--bg-color)",
+                        borderRadius: "4px",
+                        overflow: "hidden",
+                        marginBottom: "1.5rem",
+                      }}
                     >
                       <div
                         style={{
-                          width: "12px",
-                          height: "12px",
-                          borderRadius: "50%",
-                          background: task.completed ? "var(--success-color, #10b981)" : "var(--primary-color)",
+                          width: `${currentProject.progress}%`,
+                          height: "100%",
+                          background: "var(--primary-color)",
+                          borderRadius: "4px",
                         }}
                       ></div>
-                      <p style={{ margin: 0, fontSize: "0.9rem", color: task.completed ? "var(--text-sec)" : "var(--text-pri)" }}>
-                        {task.title}{" "}
-                        {!task.completed && (
-                          <span style={{ color: "var(--text-sec)" }}>
-                            (In Progress)
-                          </span>
-                        )}
-                      </p>
                     </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-               <p style={{ color: "var(--text-sec)" }}>No active project currently.</p>
-            )}
-          </section>
 
-          {/* Recent Invoices */}
-          <section
-            style={{
-              background: "var(--surface)",
-              padding: "2rem",
-              borderRadius: "12px",
-              border: "1px solid var(--border)",
-            }}
-          >
-            <h3 style={{ margin: "0 0 1.5rem" }}>Recent Invoices</h3>
-            {recentInvoices && recentInvoices.length > 0 ? (
-              <table
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.75rem",
+                      }}
+                    >
+                      {currentProject.tasks?.map((task: any, index: number) => (
+                        <div
+                          key={index}
+                          style={{ display: "flex", gap: "1rem", alignItems: "center" }}
+                        >
+                          <div
+                            style={{
+                              width: "12px",
+                              height: "12px",
+                              borderRadius: "50%",
+                              background: task.completed ? "var(--success-color, #10b981)" : "var(--primary-color)",
+                            }}
+                          ></div>
+                          <p style={{ margin: 0, fontSize: "0.9rem", color: task.completed ? "var(--text-sec)" : "var(--text-pri)" }}>
+                            {task.title}{" "}
+                            {!task.completed && (
+                              <span style={{ color: "var(--text-sec)" }}>
+                                (In Progress)
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p style={{ color: "var(--text-sec)" }}>No active project currently.</p>
+                )}
+              </section>
+
+              {/* Recent Invoices */}
+              <section
                 style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  textAlign: "left",
+                  background: "var(--surface)",
+                  padding: "2rem",
+                  borderRadius: "12px",
+                  border: "1px solid var(--border)",
                 }}
               >
-                <thead>
-                  <tr
+                <h3 style={{ margin: "0 0 1.5rem" }}>Recent Invoices</h3>
+                {recentInvoices && recentInvoices.length > 0 ? (
+                  <table
                     style={{
-                      borderBottom: "1px solid var(--border)",
-                      color: "var(--text-sec)",
+                      width: "100%",
+                      borderCollapse: "collapse",
+                      textAlign: "left",
                     }}
                   >
-                    <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
-                      Invoice Number
-                    </th>
-                    <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
-                      Date
-                    </th>
-                    <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
-                      Amount
-                    </th>
-                    <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentInvoices.map((invoice: any, index: number) => (
-                    <tr key={index} style={{ borderBottom: "1px solid var(--border)" }}>
-                      <td style={{ padding: "1rem 0" }}>{invoice.invoiceNumber}</td>
-                      <td
+                    <thead>
+                      <tr
                         style={{
-                          padding: "1rem 0",
+                          borderBottom: "1px solid var(--border)",
                           color: "var(--text-sec)",
                         }}
                       >
-                        {new Date(invoice.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
-                      </td>
-                      <td style={{ padding: "1rem 0", fontWeight: "500" }}>
-                        ₹{invoice.amount.toLocaleString('en-IN')}
-                      </td>
-                      <td style={{ padding: "1rem 0" }}>
-                        <span
-                          style={{
-                            background: invoice.status === 'PAID' ? "#d1fae5" : "#fef3c7",
-                            color: invoice.status === 'PAID' ? "#065f46" : "#92400e",
-                            padding: "0.25rem 0.5rem",
-                            borderRadius: "4px",
-                            fontSize: "0.75rem",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {invoice.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-               <p style={{ color: "var(--text-sec)" }}>No recent invoices.</p>
-            )}
-          </section>
+                        <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
+                          Invoice Number
+                        </th>
+                        <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
+                          Date
+                        </th>
+                        <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
+                          Amount
+                        </th>
+                        <th style={{ paddingBottom: "0.75rem", fontWeight: "500" }}>
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentInvoices.map((invoice: any, index: number) => (
+                        <tr key={index} style={{ borderBottom: "1px solid var(--border)" }}>
+                          <td style={{ padding: "1rem 0" }}>{invoice.invoiceNumber}</td>
+                          <td
+                            style={{
+                              padding: "1rem 0",
+                              color: "var(--text-sec)",
+                            }}
+                          >
+                            {new Date(invoice.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
+                          </td>
+                          <td style={{ padding: "1rem 0", fontWeight: "500" }}>
+                            ₹{invoice.amount.toLocaleString('en-IN')}
+                          </td>
+                          <td style={{ padding: "1rem 0" }}>
+                            <span
+                              style={{
+                                background: invoice.status === 'PAID' ? "#d1fae5" : "#fef3c7",
+                                color: invoice.status === 'PAID' ? "#065f46" : "#92400e",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "4px",
+                                fontSize: "0.75rem",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {invoice.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p style={{ color: "var(--text-sec)" }}>No recent invoices.</p>
+                )}
+              </section>
+            </>
+          )}
+
+          {activeTab === "projects" && (
+            <section style={{ background: "var(--surface)", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border)" }}>
+              <h3 style={{ margin: "0 0 1.5rem" }}>All Projects</h3>
+              <p style={{ color: "var(--text-sec)" }}>Full project list feature is coming soon!</p>
+            </section>
+          )}
+
+          {activeTab === "invoices" && (
+            <section style={{ background: "var(--surface)", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border)" }}>
+              <h3 style={{ margin: "0 0 1.5rem" }}>All Invoices</h3>
+              <p style={{ color: "var(--text-sec)" }}>Invoice management feature is coming soon!</p>
+            </section>
+          )}
+
+          {activeTab === "messages" && (
+            <section style={{ background: "var(--surface)", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border)" }}>
+              <h3 style={{ margin: "0 0 1.5rem" }}>Messages</h3>
+              <p style={{ color: "var(--text-sec)" }}>Messaging interface is coming soon!</p>
+            </section>
+          )}
         </main>
       </div>
     </div>
