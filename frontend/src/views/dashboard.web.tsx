@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { getDashboardDataApi, updateProfilePictureApi, setActiveSession } from "../controllers/api.client";
+import { getDashboardDataApi, updateProfilePictureApi, updateProfileApi, updatePasswordApi, setActiveSession } from "../controllers/api.client";
 import type { User } from "../controllers/api.client";
 import "../styles/auth.css";
 
@@ -14,6 +14,15 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [profileForm, setProfileForm] = useState({ name: initialUser.name || '', phone: initialUser.phone || '' });
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
+  const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
+
+  useEffect(() => {
+    setProfileForm({ name: user.name || '', phone: user.phone || '' });
+  }, [user]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,6 +61,38 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
         }
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileMessage({ type: '', text: '' });
+    try {
+      const res = await updateProfileApi(profileForm);
+      setUser(res.user);
+      setActiveSession(res.user, localStorage.getItem('auth_token') || undefined);
+      setProfileMessage({ type: 'success', text: 'Profile updated successfully.' });
+    } catch (err: any) {
+      setProfileMessage({ type: 'error', text: err.message || 'Failed to update profile.' });
+    }
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordMessage({ type: '', text: '' });
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordMessage({ type: 'error', text: 'New passwords do not match.' });
+      return;
+    }
+    try {
+      await updatePasswordApi({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      });
+      setPasswordMessage({ type: 'success', text: 'Password updated successfully.' });
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err: any) {
+      setPasswordMessage({ type: 'error', text: err.message || 'Failed to update password.' });
     }
   };
 
@@ -205,6 +246,18 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
               }}
             >
               Messages
+            </a>
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); setActiveTab("settings"); }}
+              style={{
+                padding: "0.5rem",
+                color: activeTab === "settings" ? "var(--accent)" : "var(--text-sec)",
+                fontWeight: activeTab === "settings" ? "500" : "normal",
+                textDecoration: "none",
+              }}
+            >
+              Settings
             </a>
           </nav>
 
@@ -607,6 +660,95 @@ export function DashboardPage({ user: initialUser, onLogout }: DashboardProps) {
                 <p style={{ color: "var(--text-sec)" }}>No messages found.</p>
               )}
             </section>
+          )}
+
+          {activeTab === "settings" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+              <section style={{ background: "var(--surface)", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border)" }}>
+                <h3 style={{ margin: "0 0 1.5rem" }}>Update Profile</h3>
+                {profileMessage.text && (
+                  <div style={{ 
+                    padding: "1rem", 
+                    marginBottom: "1.5rem", 
+                    borderRadius: "8px", 
+                    background: profileMessage.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                    color: profileMessage.type === 'success' ? '#10b981' : '#ef4444',
+                    border: `1px solid ${profileMessage.type === 'success' ? '#10b981' : '#ef4444'}`
+                  }}>
+                    {profileMessage.text}
+                  </div>
+                )}
+                <form onSubmit={handleProfileSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem", maxWidth: "400px" }}>
+                  <div className="form-group">
+                    <label>Full Name</label>
+                    <input 
+                      type="text" 
+                      value={profileForm.name} 
+                      onChange={(e) => setProfileForm({...profileForm, name: e.target.value})}
+                      required 
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Phone Number</label>
+                    <input 
+                      type="tel" 
+                      value={profileForm.phone} 
+                      onChange={(e) => setProfileForm({...profileForm, phone: e.target.value})}
+                      required 
+                    />
+                  </div>
+                  <button type="submit" className="submit-btn" style={{ marginTop: "1rem" }}>Save Profile</button>
+                </form>
+              </section>
+
+              <section style={{ background: "var(--surface)", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border)" }}>
+                <h3 style={{ margin: "0 0 1.5rem" }}>Change Password</h3>
+                {passwordMessage.text && (
+                  <div style={{ 
+                    padding: "1rem", 
+                    marginBottom: "1.5rem", 
+                    borderRadius: "8px", 
+                    background: passwordMessage.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                    color: passwordMessage.type === 'success' ? '#10b981' : '#ef4444',
+                    border: `1px solid ${passwordMessage.type === 'success' ? '#10b981' : '#ef4444'}`
+                  }}>
+                    {passwordMessage.text}
+                  </div>
+                )}
+                <form onSubmit={handlePasswordSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem", maxWidth: "400px" }}>
+                  <div className="form-group">
+                    <label>Current Password</label>
+                    <input 
+                      type="password" 
+                      value={passwordForm.currentPassword} 
+                      onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                      required 
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>New Password</label>
+                    <input 
+                      type="password" 
+                      value={passwordForm.newPassword} 
+                      onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                      required 
+                      minLength={6}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Confirm New Password</label>
+                    <input 
+                      type="password" 
+                      value={passwordForm.confirmPassword} 
+                      onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                      required 
+                      minLength={6}
+                    />
+                  </div>
+                  <button type="submit" className="submit-btn" style={{ marginTop: "1rem" }}>Update Password</button>
+                </form>
+              </section>
+            </div>
           )}
         </main>
       </div>

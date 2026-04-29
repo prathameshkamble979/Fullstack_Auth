@@ -66,3 +66,17 @@ export async function updateProfilePictureApi(profilePictureBase64: string) {
     body: JSON.stringify({ profilePicture: profilePictureBase64 }),
   });
 }
+
+export async function updateProfileApi(profileData: { name: string, phone: string }) {
+  return fetchApi('/user/profile', {
+    method: 'PUT',
+    body: JSON.stringify(profileData),
+  });
+}
+
+export async function updatePasswordApi(passwordData: { currentPassword: string, newPassword: string }) {
+  return fetchApi('/user/password', {
+    method: 'PUT',
+    body: JSON.stringify(passwordData),
+  });
+}
